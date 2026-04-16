@@ -1,0 +1,20 @@
+{
+  "gates": {
+    "GateA": { "name": "North Gate", "crowdDensity": 85, "status": "open", "distanceFromUser": 5 },
+    "GateB": { "name": "East Gate", "crowdDensity": 20, "status": "open", "distanceFromUser": 15 },
+    "GateC": { "name": "South Gate", "crowdDensity": 95, "status": "congested", "distanceFromUser": 25 }
+  },
+  "foodStalls": {
+    "BurgerStand": { "name": "Burger Stand Main", "waitTime": 25, "crowdDensity": 90, "popularity": "high" },
+    "VeganKiosk": { "name": "Express Vegan Kiosk", "waitTime": 2, "crowdDensity": 10, "popularity": "low" },
+    "HotdogCart": { "name": "Hotdog Reserve", "waitTime": 10, "crowdDensity": 45, "popularity": "medium" }
+  },
+  "paths": {
+    "Path1": { "name": "Main Concourse", "congestionLevel": 80, "estimatedTime": 15 },
+    "Path2": { "name": "Upper Deck Tunnel", "congestionLevel": 15, "estimatedTime": 5 },
+    "Path3": { "name": "VIP Express", "congestionLevel": 5, "estimatedTime": 2 }
+  },
+  "alerts": {
+    "Message1": "Gate C is currently heavily congested. Please avoid."
+  }
+}
