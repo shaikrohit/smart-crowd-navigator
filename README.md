@@ -1,47 +1,122 @@
 # 🏟️ Smart Crowd Navigator Assistant
 
-A lightweight, modern AI-driven routing UI that intelligently optimizes crowd movement inside large physical venues. Unifying real-time tracking data with intelligent multi-factor decision algorithms, this system abolishes chaotic bottlenecks and revolutionizes stadium logistics.
+An AI-driven stadium navigation system that provides real-time crowd routing recommendations. Built for hackathon submission — lightweight, secure, and fully functional.
 
-## ✨ Solution Overview
+## ✨ What It Does
 
-The **Smart Crowd Navigator Assistant** acts as "Google Maps for crowd movement inside stadiums". It ingests real-time Firebase sensor data measuring `crowdDensity`, `waitTime`, and `congestionLevel`, then applies a multi-factor decision engine onto a beautifully designed, lightweight UI. The algorithm mathematically maps the attendee's intent to the least congested path.
-
-## 🎨 User Interface Experience
-
-The frontend has been entirely redesigned as a modern, clean, real-world product application, focusing heavily on intuitive UX.
-- **Immediate Understanding**: Title and subtitles clarify the specific use case instantly within 3 seconds.
-- **Smart Interactions**: Modern glassmorphic form elements prevent blank submission inputs natively. 
-- **Graceful Rendering**: Animated loaders provide comfort while data is dynamically analyzed.
-- **Vibrant Routing Results**: Returns highly scannable cards prioritizing the **Recommended Target** explicitly alongside visual Confidence tagging (High/Medium/Low). 
+Users select their **current location** and **desired action** (entry, exit, food, restroom, navigation). The system fetches live stadium data from Firebase, scores all options using a multi-factor algorithm, and instantly recommends the best choice with a confidence rating.
 
 ## 🏗 Architecture
 
 ```text
-       [ 🌐 Modern UI Overlay (index.html) ] 
-                 | (Dropdown intent + Location)
-                 v
-       [ 🧠 Core Logic Engine (assistant.js) ]
-                 |
-      +----------+----------+
-      |                     |
-[ Firebase RTDB ]    [ data.json ]
-  (Live Stats)       (Offline Fallback)
+┌─────────────────────────────────┐
+│   Browser UI (index.html)       │
+│   └─ User selects location +   │
+│      intent from dropdowns      │
+└────────────┬────────────────────┘
+             │
+┌────────────▼────────────────────┐
+│   Decision Engine (assistant.js)│
+│   └─ Sanitize → Fetch → Score  │
+│      → Rank → Recommend         │
+└────────────┬────────────────────┘
+             │
+     ┌───────┴───────┐
+     │               │
+┌────▼─────┐  ┌──────▼──────┐
+│ Firebase │  │  data.json  │
+│  RTDB    │  │  (fallback) │
+└──────────┘  └─────────────┘
 ```
 
-## ⚙️ How It Works (Step-by-Step)
+## 📁 File Structure
 
-1. **User Action:** The attendee opens `index.html` natively in any web browser. They select their context from smooth interactive dropdowns (Location: GateB, Intent: food).
-2. **Data Integration:** The `assistant.js` engine seamlessly calls the Live Stadium database via a direct REST `fetch()`. If network latency faults out, it safely diverts to a static local data construct ensuring 100% reliability.
-3. **Multi-Factor Logic Algorithms:** Path scoring reacts intelligently depending on Intent constraints (heavily rebuking queue congestion logic vs distance).
-4. **Structured Decision:** Logic dynamically produces target nodes mapping minimal mathematical wait friction to users.
+| File | Purpose |
+|------|---------|
+| `index.html` | Frontend UI with ARIA accessibility and Google Maps integration |
+| `assistant.js` | Core decision engine with input validation, caching, and test suite |
+| `server.js` | Express server with security headers, rate limiting, and structured logging |
+| `data.json` | Offline fallback dataset matching Firebase schema |
+| `package.json` | Project config with `npm start` and `npm test` commands |
 
-## 📊 Firebase Integration
+## ⚙️ How the Scoring Algorithm Works
 
-- **Endpoint Execution:** Bound transparently to `crowd-navigator-default-rtdb` databases without heavy reliance on authentication wrappers.
-- **Frameworkless Delivery:** `< 1 MB` execution sizing allowing delivery gracefully over 3G Stadium Network profiles.
+Each option is scored based on intent type (lower score = better):
 
-## 🔒 Security & Efficiency Standards
+| Intent | Factors | Formula |
+|--------|---------|---------|
+| **Entry/Exit** | Crowd density, distance, congestion status | `density + (distance × 2) + (congested ? 200 : 0)` |
+| **Food/Restroom** | Wait time (4× weight), crowd density | `(waitTime × 4) + density` |
+| **Navigation** | Congestion level (2×), estimated time (6×) | `(congestion × 2) + (time × 6)` |
 
-- **Load Profile Design**: Application guarantees an entirely modular `< 1MB` infrastructure.
-- **Library Reliance**: Bound strictly on Vanilla JavaScript paradigms (`HTML/CSS/JS`). Eliminating arbitrary frameworks guarantees lightweight DOM processing scaling effortlessly under stress loads.
-- **Fail-Safes**: Completely offline capable via resilient `try-catch` datasets natively tied.
+## 🔒 Security Implementation
+
+- **Input sanitization**: Whitelist-based validation rejects unknown intents and strips unsafe characters
+- **Fetch timeout**: AbortController enforces a 3.5-second network timeout
+- **HTTP headers**: CSP, HSTS, X-Frame-Options, X-Content-Type-Options, X-XSS-Protection
+- **Rate limiting**: Zero-dependency IP rate limiter (100 req / 15 min window)
+- **Error masking**: Internal stack traces are never exposed to clients
+
+## ⚡ Efficiency Optimizations
+
+- **In-memory cache**: 5-second TTL prevents redundant Firebase calls
+- **Browser caching**: Static assets cached for 24 hours with ETag support
+- **Preconnect hints**: DNS prefetch for Google Fonts reduces load time
+- **Zero heavy dependencies**: Only Express (for Cloud Run hosting)
+
+## 🧪 Testing
+
+Run the full test suite:
+
+```bash
+npm test
+```
+
+**8 automated tests** using Node.js built-in `assert` module:
+
+| # | Test | Category |
+|---|------|----------|
+| 1 | Valid entry returns gate + Google Maps link | Functionality |
+| 2 | Food request returns recommendation without Maps link | Functionality |
+| 3 | Navigation returns path with time info | Functionality |
+| 4 | Malicious input is rejected | Security |
+| 5 | Empty input is rejected | Security |
+| 6 | Null input is rejected | Security |
+| 7 | Cache returns data within TTL | Efficiency |
+| 8 | Response contains all required fields | Code Quality |
+
+## ♿ Accessibility Features
+
+- Semantic HTML: `<header>`, `<main>`, `<section>` with proper hierarchy
+- ARIA attributes: `aria-live="polite"`, `aria-atomic`, `aria-required`, `aria-busy`, `aria-label`
+- Screen reader support: `.sr-only` class for loading context
+- `<noscript>` fallback for JavaScript-disabled browsers
+- Focus management: Results card receives focus when rendered
+- High contrast: WCAG-compliant color ratios
+- Keyboard navigable: All interactive elements are tab-accessible with visible focus rings
+
+## 🌐 Google Services Integration
+
+| Service | How It's Used |
+|---------|---------------|
+| **Google Cloud Run** | Production hosting with auto-scaling |
+| **Google Cloud Logging** | Structured JSON logs (`severity`, `message`) for monitoring |
+| **Google Maps URL API** | Dynamic gate routing links for entry/exit recommendations |
+| **Firebase Realtime Database** | Live stadium data source (REST API, no SDK) |
+| **Google Fonts** | Inter font family for the UI |
+
+## 🚀 Deployment
+
+**Local development:**
+```bash
+npm install
+npm start        # Starts server on port 8080
+npm test         # Runs automated test suite
+```
+
+**Google Cloud Run (via Cloud Shell):**
+```bash
+git clone https://github.com/shaikrohit/smart-crowd-navigator.git
+cd smart-crowd-navigator
+gcloud run deploy smart-crowd-navigator --source . --region us-central1 --allow-unauthenticated
+```

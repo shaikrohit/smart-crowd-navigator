@@ -3,8 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Smart Crowd Navigator</title>
-  <meta name="description" content="Real-time venue tracking AI system to optimize physical workflows effortlessly.">
+  <title>Smart Crowd Navigator – Real-Time Stadium Routing</title>
+  <meta name="description" content="AI-powered stadium navigation system providing real-time crowd routing recommendations to reduce wait times and avoid congestion.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
     :root {
@@ -38,7 +40,7 @@
       padding: 2rem 1rem;
     }
 
-    /* Screen Reader Only Utility Class for Accessibility */
+    /* Accessibility: Screen-reader only utility */
     .sr-only {
       position: absolute;
       width: 1px;
@@ -101,6 +103,7 @@
       color: var(--text-main);
       border: 1px solid var(--border);
       font-size: 1rem;
+      font-family: inherit;
       appearance: none;
       background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%236b7280%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E");
       background-repeat: no-repeat;
@@ -126,6 +129,7 @@
       border: none;
       font-weight: 600;
       font-size: 1rem;
+      font-family: inherit;
       cursor: pointer;
       transition: all 0.2s;
       display: flex;
@@ -240,30 +244,52 @@
     .badge.High { background: var(--success-light); color: var(--success); }
     .badge.Medium { background: var(--warning-light); color: var(--warning); }
     .badge.Low { background: var(--danger-light); color: var(--danger); }
+
+    /* Google Maps link styling */
+    .maps-link {
+      color: var(--primary);
+      font-size: 0.95rem;
+      font-weight: 600;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      transition: opacity 0.2s;
+    }
+    .maps-link:hover { opacity: 0.8; }
+    .maps-link:focus { outline: 2px solid var(--primary); outline-offset: 2px; border-radius: 4px; }
   </style>
 </head>
 <body>
 
+  <!-- Accessibility: noscript fallback for users with JavaScript disabled -->
+  <noscript>
+    <div style="text-align:center; padding:2rem; font-family:sans-serif;">
+      <h1>Smart Crowd Navigator</h1>
+      <p>This application requires JavaScript to function. Please enable JavaScript in your browser settings.</p>
+    </div>
+  </noscript>
+
   <header class="header" role="banner">
-    <h1 aria-label="Smart Crowd Navigator Primary Interface">Smart Crowd Navigator</h1>
+    <h1>Smart Crowd Navigator</h1>
     <p>Get real-time recommendations to avoid crowds and save time in stadiums</p>
   </header>
 
-  <main class="card" id="input-card" role="main" aria-label="Query Form Input Region">
+  <main class="card" id="input-card" aria-label="Navigation query form">
     <div class="form-group">
-      <label class="form-label" for="location" id="loc-label">Where are you currently?</label>
-      <select class="form-select" id="location" required aria-labelledby="loc-label">
-        <option value="" disabled selected>Select starting point...</option>
-        <option value="GateA">GateA</option>
-        <option value="GateB">GateB</option>
-        <option value="GateC">GateC</option>
+      <label class="form-label" for="location">Where are you currently?</label>
+      <select class="form-select" id="location" required aria-required="true">
+        <option value="" disabled selected>Select starting point…</option>
+        <option value="GateA">Gate A (North)</option>
+        <option value="GateB">Gate B (East)</option>
+        <option value="GateC">Gate C (South)</option>
       </select>
     </div>
     
     <div class="form-group">
-      <label class="form-label" for="intent" id="intent-label">What do you want to do?</label>
-      <select class="form-select" id="intent" required aria-labelledby="intent-label">
-        <option value="" disabled selected>Select an action...</option>
+      <label class="form-label" for="intent">What do you want to do?</label>
+      <select class="form-select" id="intent" required aria-required="true">
+        <option value="" disabled selected>Select an action…</option>
         <option value="entry">Entry</option>
         <option value="exit">Exit</option>
         <option value="food">Food</option>
@@ -272,110 +298,121 @@
       </select>
     </div>
 
-    <!-- Accessibility: added descriptive role and aria-live status tracking -->
-    <button id="btn-submit" class="btn-submit" onclick="fetchRouting()" aria-live="assertive" role="button">
+    <button id="btn-submit" class="btn-submit" type="button" aria-label="Get smart recommendation based on live crowd data">
       Get Smart Recommendation
     </button>
-    <span class="helper-text" id="helper-context">Based on live crowd data, we suggest the best option for you.</span>
+    <span class="helper-text">Based on live crowd data, we suggest the best option for you.</span>
   </main>
 
-  <!-- Accessibility: screen-reader focused loading context -->
+  <!-- Accessibility: polite live region for loading state -->
   <div id="loading" class="loader" role="status" aria-hidden="true" aria-live="polite">
-    Analyzing crowd data<span class="dots" aria-hidden="true"></span>
-    <span class="sr-only">Fetching algorithm evaluations...</span>
+    <span>Analyzing crowd data</span><span class="dots" aria-hidden="true"></span>
+    <span class="sr-only">Loading recommendation results…</span>
   </div>
 
-  <!-- Accessibility: assertive area specifically designated for dynamic algorithmic replies -->
-  <section class="card" id="result-card" role="region" aria-live="polite" aria-atomic="true">
+  <!-- Accessibility: polite live region for dynamic results -->
+  <section class="card" id="result-card" role="region" aria-label="Recommendation results" aria-live="polite" aria-atomic="true">
     <h2 class="result-header">Recommended Action</h2>
-    <div class="action-target" id="val-action">Processing...</div>
+    <p class="action-target" id="val-action">Processing…</p>
 
     <div class="result-detail">
-      <div class="detail-label">Reason</div>
-      <div class="detail-text" id="val-reason">Evaluating paths...</div>
+      <p class="detail-label" id="reason-label">Reason</p>
+      <p class="detail-text" id="val-reason" aria-labelledby="reason-label">Evaluating paths…</p>
     </div>
 
     <div class="result-detail" style="display: flex; justify-content: space-between; align-items: flex-end; border-top: 1px solid var(--border); padding-top: 1.25rem;">
       <div>
-        <div class="detail-label">Alternative Option</div>
-        <div class="detail-text" id="val-alt" style="color: var(--text-muted); font-size: 0.9rem;">None</div>
+        <p class="detail-label" id="alt-label">Alternative Option</p>
+        <p class="detail-text" id="val-alt" aria-labelledby="alt-label" style="color: var(--text-muted); font-size: 0.9rem;">None</p>
       </div>
       <div style="text-align: right;">
-        <div class="detail-label" style="margin-bottom: 0.25rem;">Confidence Tracker</div>
-        <div id="val-conf" class="badge">Low</div>
+        <p class="detail-label" id="conf-label" style="margin-bottom: 0.25rem;">Confidence</p>
+        <span id="val-conf" class="badge" role="status" aria-labelledby="conf-label">Low</span>
       </div>
     </div>
 
-    <!-- GOOGLE SERVICES INTEGRATION natively executing -->
+    <!-- Google Services: Maps link for gate recommendations -->
     <div id="google-maps-container" style="display: none; margin-top: 1.25rem; text-align: center; border-top: 1px dashed var(--border); padding-top: 1rem;">
-      <a href="#" id="google-maps-link" target="_blank" rel="noopener noreferrer" style="color: var(--primary); font-size: 0.95rem; font-weight: 600; text-decoration: none; display: inline-flex; align-items: center; gap: 0.25rem;">
-        📍 Open Routing parameter in Google Maps
+      <a href="#" id="google-maps-link" class="maps-link" target="_blank" rel="noopener noreferrer" aria-label="Open recommended gate location in Google Maps">
+        📍 View on Google Maps
       </a>
     </div>
   </section>
 
   <script src="assistant.js"></script>
   <script>
+    'use strict';
+
+    // Bind click handler (no inline onclick for cleaner code quality)
+    document.getElementById('btn-submit').addEventListener('click', fetchRouting);
+
+    /**
+     * Handles the recommendation request lifecycle:
+     * validates input, manages loading state, calls engine, renders results.
+     */
     async function fetchRouting() {
-      const locOpt = document.getElementById('location').value;
-      const intOpt = document.getElementById('intent').value;
-      
-      if (!locOpt || !intOpt) {
-        alert("Please select both your current location and intent before continuing.");
+      var locationEl = document.getElementById('location');
+      var intentEl = document.getElementById('intent');
+      var locVal = locationEl.value;
+      var intVal = intentEl.value;
+
+      // Input validation with user-friendly feedback
+      if (!locVal || !intVal) {
+        alert('Please select both your current location and desired action.');
         return;
       }
 
-      const btn = document.getElementById('btn-submit');
-      const loader = document.getElementById('loading');
-      const results = document.getElementById('result-card');
+      var btn = document.getElementById('btn-submit');
+      var loader = document.getElementById('loading');
+      var resultCard = document.getElementById('result-card');
 
+      // Set loading state
       btn.disabled = true;
-      btn.innerHTML = `Calculating...`;
-      btn.setAttribute("aria-busy", "true");
-      results.style.display = 'none';
+      btn.textContent = 'Calculating…';
+      btn.setAttribute('aria-busy', 'true');
+      resultCard.style.display = 'none';
       loader.style.display = 'flex';
-      loader.setAttribute("aria-hidden", "false");
+      loader.setAttribute('aria-hidden', 'false');
 
       try {
-        const payload = { location: locOpt, intent: intOpt };
+        var res = await window.getSmartRecommendation({ location: locVal, intent: intVal });
 
-        // Core Engine Native execution tracking
-        const res = await window.getSmartRecommendation(payload);
-        
+        // Render recommendation data
         document.getElementById('val-action').textContent = res.recommended_action || 'N/A';
-        document.getElementById('val-reason').textContent = res.reason || 'No reasoning processed.';
+        document.getElementById('val-reason').textContent = res.reason || 'No reasoning available.';
         document.getElementById('val-alt').textContent = res.alternative_option || 'None';
-        
-        const confEl = document.getElementById('val-conf');
+
+        var confEl = document.getElementById('val-conf');
         confEl.textContent = res.confidence || 'Low';
-        confEl.className = 'badge'; 
-        if (["High", "Medium", "Low"].includes(res.confidence)) {
+        confEl.className = 'badge';
+        if (['High', 'Medium', 'Low'].indexOf(res.confidence) !== -1) {
           confEl.classList.add(res.confidence);
         }
 
-        // GOOGLE MAPS ACCESSIBILITY RENDERING
-        const mapsBlock = document.getElementById('google-maps-container');
+        // Google Maps link rendering
+        var mapsContainer = document.getElementById('google-maps-container');
         if (res.google_maps_link) {
-            document.getElementById('google-maps-link').href = res.google_maps_link;
-            mapsBlock.style.display = 'block';
+          document.getElementById('google-maps-link').href = res.google_maps_link;
+          mapsContainer.style.display = 'block';
         } else {
-            mapsBlock.style.display = 'none';
+          mapsContainer.style.display = 'none';
         }
 
-        results.style.display = 'block';
-        
-        // ACCESSIBILITY: Shift browser engine bounds targeting screen readers securely implicitly jumping directly
-        results.setAttribute('tabindex', '-1');
-        results.focus({ preventScroll: false });
+        resultCard.style.display = 'block';
+
+        // Accessibility: move focus to result card for screen readers
+        resultCard.setAttribute('tabindex', '-1');
+        resultCard.focus();
+        resultCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 
       } catch (err) {
-        console.error("Evaluation Blocked natively.", err);
-        alert("System encountered a constrained logic protection fault. Try again.");
+        console.error('Recommendation error:', err);
+        alert('Something went wrong. Please try again.');
       } finally {
         btn.disabled = false;
-        btn.innerHTML = `Get Smart Recommendation`;
-        btn.setAttribute("aria-busy", "false");
-        loader.setAttribute("aria-hidden", "true");
+        btn.textContent = 'Get Smart Recommendation';
+        btn.setAttribute('aria-busy', 'false');
+        loader.setAttribute('aria-hidden', 'true');
         loader.style.display = 'none';
       }
     }
