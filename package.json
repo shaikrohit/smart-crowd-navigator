@@ -1,0 +1,24 @@
+{
+  "name": "smart-crowd-navigator",
+  "version": "1.0.0",
+  "description": "A lightweight, modern AI-driven routing UI that intelligently optimizes crowd movement inside large physical venues. Unifying real-time tracking data with intelligent multi-factor decision algorithms, this system abolishes chaotic bottlenecks and revolutionizes stadium logistics.",
+  "main": "assistant.js",
+  "scripts": {
+    "start": "node server.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/shaikrohit/smart-crowd-navigator.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/shaikrohit/smart-crowd-navigator/issues"
+  },
+  "homepage": "https://github.com/shaikrohit/smart-crowd-navigator#readme",
+  "dependencies": {
+    "express": "^5.2.1"
+  }
+}
