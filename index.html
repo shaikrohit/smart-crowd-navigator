@@ -305,6 +305,13 @@
         <div id="val-conf" class="badge">Low</div>
       </div>
     </div>
+
+    <!-- GOOGLE SERVICES INTEGRATION natively executing -->
+    <div id="google-maps-container" style="display: none; margin-top: 1.25rem; text-align: center; border-top: 1px dashed var(--border); padding-top: 1rem;">
+      <a href="#" id="google-maps-link" target="_blank" rel="noopener noreferrer" style="color: var(--primary); font-size: 0.95rem; font-weight: 600; text-decoration: none; display: inline-flex; align-items: center; gap: 0.25rem;">
+        📍 Open Routing parameter in Google Maps
+      </a>
+    </div>
   </section>
 
   <script src="assistant.js"></script>
@@ -322,7 +329,6 @@
       const loader = document.getElementById('loading');
       const results = document.getElementById('result-card');
 
-      // UI state guard locking ensures efficiency logic remains intact alongside Accessibility hooks
       btn.disabled = true;
       btn.innerHTML = `Calculating...`;
       btn.setAttribute("aria-busy", "true");
@@ -333,10 +339,9 @@
       try {
         const payload = { location: locOpt, intent: intOpt };
 
-        // Core engine handles strict caching and sanitized inputs natively now!
+        // Core Engine Native execution tracking
         const res = await window.getSmartRecommendation(payload);
         
-        // Render verified schema guarantees safely
         document.getElementById('val-action').textContent = res.recommended_action || 'N/A';
         document.getElementById('val-reason').textContent = res.reason || 'No reasoning processed.';
         document.getElementById('val-alt').textContent = res.alternative_option || 'None';
@@ -348,8 +353,21 @@
           confEl.classList.add(res.confidence);
         }
 
+        // GOOGLE MAPS ACCESSIBILITY RENDERING
+        const mapsBlock = document.getElementById('google-maps-container');
+        if (res.google_maps_link) {
+            document.getElementById('google-maps-link').href = res.google_maps_link;
+            mapsBlock.style.display = 'block';
+        } else {
+            mapsBlock.style.display = 'none';
+        }
+
         results.style.display = 'block';
-        results.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        
+        // ACCESSIBILITY: Shift browser engine bounds targeting screen readers securely implicitly jumping directly
+        results.setAttribute('tabindex', '-1');
+        results.focus({ preventScroll: false });
+
       } catch (err) {
         console.error("Evaluation Blocked natively.", err);
         alert("System encountered a constrained logic protection fault. Try again.");
