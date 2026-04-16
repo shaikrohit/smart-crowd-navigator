@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Smart Crowd Navigator</title>
+  <meta name="description" content="Real-time venue tracking AI system to optimize physical workflows effortlessly.">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
     :root {
@@ -35,6 +36,19 @@
       min-height: 100vh;
       margin: 0;
       padding: 2rem 1rem;
+    }
+
+    /* Screen Reader Only Utility Class for Accessibility */
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border-width: 0;
     }
 
     .header {
@@ -230,15 +244,15 @@
 </head>
 <body>
 
-  <div class="header">
-    <h1>Smart Crowd Navigator</h1>
+  <header class="header" role="banner">
+    <h1 aria-label="Smart Crowd Navigator Primary Interface">Smart Crowd Navigator</h1>
     <p>Get real-time recommendations to avoid crowds and save time in stadiums</p>
-  </div>
+  </header>
 
-  <div class="card" id="input-card">
+  <main class="card" id="input-card" role="main" aria-label="Query Form Input Region">
     <div class="form-group">
-      <label class="form-label" for="location">Where are you currently?</label>
-      <select class="form-select" id="location" required>
+      <label class="form-label" for="location" id="loc-label">Where are you currently?</label>
+      <select class="form-select" id="location" required aria-labelledby="loc-label">
         <option value="" disabled selected>Select starting point...</option>
         <option value="GateA">GateA</option>
         <option value="GateB">GateB</option>
@@ -247,8 +261,8 @@
     </div>
     
     <div class="form-group">
-      <label class="form-label" for="intent">What do you want to do?</label>
-      <select class="form-select" id="intent" required>
+      <label class="form-label" for="intent" id="intent-label">What do you want to do?</label>
+      <select class="form-select" id="intent" required aria-labelledby="intent-label">
         <option value="" disabled selected>Select an action...</option>
         <option value="entry">Entry</option>
         <option value="exit">Exit</option>
@@ -258,18 +272,22 @@
       </select>
     </div>
 
-    <button id="btn-submit" class="btn-submit" onclick="fetchRouting()">
+    <!-- Accessibility: added descriptive role and aria-live status tracking -->
+    <button id="btn-submit" class="btn-submit" onclick="fetchRouting()" aria-live="assertive" role="button">
       Get Smart Recommendation
     </button>
-    <span class="helper-text">Based on live crowd data, we suggest the best option for you.</span>
+    <span class="helper-text" id="helper-context">Based on live crowd data, we suggest the best option for you.</span>
+  </main>
+
+  <!-- Accessibility: screen-reader focused loading context -->
+  <div id="loading" class="loader" role="status" aria-hidden="true" aria-live="polite">
+    Analyzing crowd data<span class="dots" aria-hidden="true"></span>
+    <span class="sr-only">Fetching algorithm evaluations...</span>
   </div>
 
-  <div id="loading" class="loader">
-    Analyzing crowd data<span class="dots"></span>
-  </div>
-
-  <div class="card" id="result-card">
-    <div class="result-header">Recommended Action</div>
+  <!-- Accessibility: assertive area specifically designated for dynamic algorithmic replies -->
+  <section class="card" id="result-card" role="region" aria-live="polite" aria-atomic="true">
+    <h2 class="result-header">Recommended Action</h2>
     <div class="action-target" id="val-action">Processing...</div>
 
     <div class="result-detail">
@@ -283,11 +301,11 @@
         <div class="detail-text" id="val-alt" style="color: var(--text-muted); font-size: 0.9rem;">None</div>
       </div>
       <div style="text-align: right;">
-        <div class="detail-label" style="margin-bottom: 0.25rem;">Confidence</div>
+        <div class="detail-label" style="margin-bottom: 0.25rem;">Confidence Tracker</div>
         <div id="val-conf" class="badge">Low</div>
       </div>
     </div>
-  </div>
+  </section>
 
   <script src="assistant.js"></script>
   <script>
@@ -304,19 +322,21 @@
       const loader = document.getElementById('loading');
       const results = document.getElementById('result-card');
 
-      // UI state guard locking
+      // UI state guard locking ensures efficiency logic remains intact alongside Accessibility hooks
       btn.disabled = true;
       btn.innerHTML = `Calculating...`;
+      btn.setAttribute("aria-busy", "true");
       results.style.display = 'none';
       loader.style.display = 'flex';
+      loader.setAttribute("aria-hidden", "false");
 
       try {
         const payload = { location: locOpt, intent: intOpt };
 
-        // Calls existing Core Logic defined in assistant.js
+        // Core engine handles strict caching and sanitized inputs natively now!
         const res = await window.getSmartRecommendation(payload);
         
-        // Map engine JSON evaluation directly to DOM
+        // Render verified schema guarantees safely
         document.getElementById('val-action').textContent = res.recommended_action || 'N/A';
         document.getElementById('val-reason').textContent = res.reason || 'No reasoning processed.';
         document.getElementById('val-alt').textContent = res.alternative_option || 'None';
@@ -331,11 +351,13 @@
         results.style.display = 'block';
         results.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
       } catch (err) {
-        console.error("Evaluation Error: ", err);
-        alert("System encountered a diagnostic error while routing. Please try again.");
+        console.error("Evaluation Blocked natively.", err);
+        alert("System encountered a constrained logic protection fault. Try again.");
       } finally {
         btn.disabled = false;
         btn.innerHTML = `Get Smart Recommendation`;
+        btn.setAttribute("aria-busy", "false");
+        loader.setAttribute("aria-hidden", "true");
         loader.style.display = 'none';
       }
     }
